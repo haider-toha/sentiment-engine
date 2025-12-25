@@ -8,8 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 const Globe = dynamic(() => import('./Globe'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full min-h-[400px] w-full items-center justify-center">
-      <Skeleton className="h-64 w-64 rounded-full" />
+    <div className="flex h-full w-full items-center justify-center">
+      <Skeleton className="h-32 w-32 rounded-full lg:h-64 lg:w-64" />
     </div>
   ),
 })

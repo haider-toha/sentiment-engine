@@ -193,7 +193,7 @@ function Scene({ countries, onCountrySelect, selectedCountry }: GlobeProps) {
 
 export default function Globe({ countries, onCountrySelect, selectedCountry }: GlobeProps) {
   return (
-    <div className="h-full min-h-[500px] w-full" style={{ backgroundColor: '#FAFAF9' }}>
+    <div className="h-full w-full" style={{ backgroundColor: '#FAFAF9' }}>
       <Canvas
         camera={{ position: [0, 0, 2.8], fov: 42 }}
         gl={{ antialias: true, alpha: true }}

@@ -122,7 +122,7 @@ export default function Home() {
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Mobile Globe - Shown at top on mobile */}
-        <div className="relative h-[280px] flex-shrink-0 border-b border-border/60 bg-[#FAFAF9] lg:hidden">
+        <div className="relative h-[280px] flex-shrink-0 overflow-hidden border-b border-border/60 bg-[#FAFAF9] lg:hidden">
           {isLoading ? (
             <div className="flex h-full w-full flex-col items-center justify-center gap-2">
               <div className="relative">
