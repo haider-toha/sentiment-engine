@@ -2,41 +2,20 @@
 
 from datetime import datetime
 from typing import Optional
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.interval import IntervalTrigger
 
 from app.config import get_settings
-from app.database import SessionLocal
-from app.models import Article
-from app.collectors import (
-    # Original collectors
-    RSSCollector,
-    RedditCollector,
-    MastodonCollector,
-    HackerNewsCollector,
-    WebScraper,
-    # New collectors for global coverage
-    GDELTCollector,
-    GoogleNewsCollector,
-    OfficialSourcesCollector,
-    BlueskyCollector,
-    LemmyCollector,
-    WikipediaCollector,
-    NewsDataCollector,
-    CurrentsAPICollector,
-    TheNewsAPICollector,
-)
-from app.services.sentiment import SentimentAnalyzer
-from app.services.aggregator import SentimentAggregator
 from app.utils.logging import get_logger
+
+# Note: Heavy imports (APScheduler, collectors, sentiment) are done lazily
+# to support read-only mode where these aren't needed
 
 logger = get_logger(__name__)
 settings = get_settings()
 
 # Global scheduler instance
-_scheduler: Optional[AsyncIOScheduler] = None
+_scheduler = None  # Optional[AsyncIOScheduler]
 _last_collection: Optional[datetime] = None
-_sentiment_analyzer: Optional[SentimentAnalyzer] = None
+_sentiment_analyzer = None  # Optional[SentimentAnalyzer]
 
 
 def scheduler_status() -> dict:
@@ -53,6 +32,11 @@ def start_scheduler():
     
     if _scheduler is not None:
         return
+    
+    # Lazy imports - only load when actually starting scheduler
+    from apscheduler.schedulers.asyncio import AsyncIOScheduler
+    from apscheduler.triggers.interval import IntervalTrigger
+    from app.services.sentiment import SentimentAnalyzer
     
     # Initialize sentiment analyzer
     _sentiment_analyzer = SentimentAnalyzer()
@@ -95,6 +79,27 @@ async def run_collection_job():
     global _last_collection
     
     logger.info("Starting collection job...")
+    
+    # Lazy imports - only load collectors when actually running collection
+    from app.database import SessionLocal
+    from app.models import Article
+    from app.collectors import (
+        RSSCollector,
+        RedditCollector,
+        MastodonCollector,
+        HackerNewsCollector,
+        WebScraper,
+        GDELTCollector,
+        GoogleNewsCollector,
+        OfficialSourcesCollector,
+        BlueskyCollector,
+        LemmyCollector,
+        WikipediaCollector,
+        NewsDataCollector,
+        CurrentsAPICollector,
+        TheNewsAPICollector,
+    )
+    from app.services.aggregator import SentimentAggregator
     
     db = SessionLocal()
     
@@ -232,6 +237,10 @@ async def run_collection_job():
 async def run_cleanup_job():
     """Cleanup job - removes old data."""
     logger.info("Starting cleanup job...")
+    
+    # Lazy imports
+    from app.database import SessionLocal
+    from app.services.aggregator import SentimentAggregator
     
     db = SessionLocal()
     
