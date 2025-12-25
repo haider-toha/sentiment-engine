@@ -146,13 +146,18 @@ class WebScraper(BaseCollector):
             if desc_elem:
                 content = desc_elem.get_text().strip()
             
+            # Determine country - use target country or detect from text
+            country_code = target.get("country")
+            if not country_code:
+                country_code = detect_country_from_text(content, title)
+            
             return CollectedArticle(
                 source_type=self.source_type,
                 source_name=target["name"],
                 title=title,
                 url=url,
                 content=content,
-                country_code=target.get("country"),
+                country_code=country_code,
                 published_at=None,  # Hard to reliably parse from scraped content
             )
         

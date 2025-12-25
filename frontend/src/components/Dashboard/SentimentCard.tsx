@@ -61,7 +61,7 @@ export default function SentimentCard({
             )}>
               <TrendIcon className="w-2.5 h-2.5" />
               <span className="tabular-nums">
-                {trend >= 0 ? '+' : ''}{(trend * 100).toFixed(1)}
+                {trend > 0.005 ? '+' : ''}{(trend * 100).toFixed(1)}
               </span>
             </div>
           )}

@@ -90,7 +90,7 @@ class DataSource(Base):
     credibility_score = Column(Float, default=1.0)  # 0.0 to 1.0
     
     # Status
-    is_active = Column(Integer, default=1)  # SQLite doesn't have native boolean
+    is_active = Column(Integer, default=1)  # Using Integer for SQLite/PostgreSQL compatibility
     last_fetched = Column(DateTime, nullable=True)
     fetch_error_count = Column(Integer, default=0)
     

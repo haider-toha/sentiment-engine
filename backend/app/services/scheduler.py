@@ -9,11 +9,22 @@ from app.config import get_settings
 from app.database import SessionLocal
 from app.models import Article
 from app.collectors import (
+    # Original collectors
     RSSCollector,
     RedditCollector,
     MastodonCollector,
     HackerNewsCollector,
     WebScraper,
+    # New collectors for global coverage
+    GDELTCollector,
+    GoogleNewsCollector,
+    OfficialSourcesCollector,
+    BlueskyCollector,
+    LemmyCollector,
+    WikipediaCollector,
+    NewsDataCollector,
+    CurrentsAPICollector,
+    TheNewsAPICollector,
 )
 from app.services.sentiment import SentimentAnalyzer
 from app.services.aggregator import SentimentAggregator
@@ -48,13 +59,13 @@ def start_scheduler():
     
     _scheduler = AsyncIOScheduler()
     
-    # Schedule collection job
+    # Schedule collection job (waits for interval, doesn't run on startup)
     _scheduler.add_job(
         run_collection_job,
         IntervalTrigger(hours=settings.collection_interval_hours),
         id="collection_job",
         name="Collect and analyze data",
-        next_run_time=datetime.now(),  # Run immediately on startup
+        # Removed: next_run_time=datetime.now() - serves existing DB data instead
     )
     
     # Schedule cleanup job (daily)
@@ -88,13 +99,37 @@ async def run_collection_job():
     db = SessionLocal()
     
     try:
-        # Initialize collectors
+        # Initialize ALL collectors for maximum global coverage
         collectors = [
-            RSSCollector(),
-            RedditCollector(),
-            MastodonCollector(),
-            HackerNewsCollector(),
-            WebScraper(),
+            # ============================================
+            # RSS/FEED COLLECTORS (No API key needed)
+            # ============================================
+            RSSCollector(),           # 300+ global RSS feeds
+            GoogleNewsCollector(),    # Google News for 80+ countries
+            OfficialSourcesCollector(), # UN, WHO, governments, think tanks
+            
+            # ============================================
+            # SOCIAL MEDIA COLLECTORS
+            # ============================================
+            RedditCollector(),        # 200+ subreddits worldwide
+            MastodonCollector(),      # Multiple Mastodon instances
+            BlueskyCollector(),       # Bluesky social network
+            LemmyCollector(),         # Federated Reddit alternative
+            
+            # ============================================
+            # SPECIALIZED COLLECTORS
+            # ============================================
+            HackerNewsCollector(),    # Tech news from HN
+            WikipediaCollector(),     # Wikipedia Current Events
+            GDELTCollector(),         # GDELT global news database
+            WebScraper(),             # Additional tech sites
+            
+            # ============================================
+            # API-BASED COLLECTORS (Optional, need API keys)
+            # ============================================
+            NewsDataCollector(),      # NewsData.io (free tier: 200/day)
+            CurrentsAPICollector(),   # Currents API (free tier: 600/day)
+            TheNewsAPICollector(),    # TheNewsAPI (free tier: 100/day)
         ]
         
         all_articles = []
@@ -102,7 +137,7 @@ async def run_collection_job():
         # Collect from all sources
         for collector in collectors:
             if not collector.is_configured():
-                logger.info(f"Skipping {collector.source_type} - not configured")
+                logger.debug(f"Skipping {collector.source_type} - not configured")
                 continue
             
             try:
@@ -113,7 +148,7 @@ async def run_collection_job():
                     count=len(articles)
                 )
             except Exception as e:
-                logger.error(
+                logger.warning(
                     f"Collection failed for {collector.source_type}",
                     error=str(e)
                 )
@@ -181,7 +216,10 @@ async def run_collection_job():
         # Cleanup collectors
         for collector in collectors:
             if hasattr(collector, 'close'):
-                await collector.close()
+                try:
+                    await collector.close()
+                except Exception:
+                    pass
     
     except Exception as e:
         logger.error("Collection job failed", error=str(e))
@@ -213,4 +251,3 @@ async def run_cleanup_job():
 async def trigger_collection():
     """Manually trigger a collection job."""
     await run_collection_job()
-
