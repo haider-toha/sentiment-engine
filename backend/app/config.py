@@ -89,7 +89,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
         "http://127.0.0.1:3001",
         "http://127.0.0.1:3002",
-        "*",  # Allow all origins in development
+        "https://sentiment-engine-frontend.onrender.com",
+        "*",  # Allow all origins
     ]
 
     model_config = {

@@ -26,6 +26,9 @@ router = APIRouter()
 @router.get("/health", response_model=HealthStatus)
 async def health_check(db: Session = Depends(get_db)):
     """Health check endpoint with system status."""
+    from app.config import get_settings
+    
+    settings = get_settings()
     status = scheduler_status()
 
     # Count today's articles
@@ -41,11 +44,17 @@ async def health_check(db: Session = Depends(get_db)):
     except Exception:
         db_ok = False
 
+    # In read-only mode, we're healthy if DB is ok (scheduler won't be running)
+    if settings.readonly_mode:
+        health_status = "healthy" if db_ok else "degraded"
+    else:
+        health_status = "healthy" if status["running"] else "degraded"
+
     return HealthStatus(
-        status="healthy" if status["running"] else "degraded",
+        status=health_status,
         last_collection=status["last_collection"],
         articles_today=articles_today or 0,
-        model_loaded=True,  # Simplified - could check actual model state
+        model_loaded=not settings.readonly_mode,  # No model in read-only mode
         database_ok=db_ok,
     )
 
