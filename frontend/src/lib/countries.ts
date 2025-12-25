@@ -84,4 +84,3 @@ export const COUNTRY_CENTERS: Record<string, [number, number]> = {
 export function getCountryCenter(code: string): [number, number] | null {
   return COUNTRY_CENTERS[code.toUpperCase()] || null
 }
-

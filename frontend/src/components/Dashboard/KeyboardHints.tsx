@@ -19,39 +19,38 @@ export default function KeyboardHints() {
         variant="ghost"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="gap-1.5 text-text-muted hover:text-foreground h-8 px-2"
+        className="h-8 gap-1.5 px-2 text-text-muted hover:text-foreground"
       >
-        <Keyboard className="w-3 h-3" />
-        <span className="hidden sm:inline text-2xs">Keys</span>
+        <Keyboard className="h-3 w-3" />
+        <span className="hidden text-2xs sm:inline">Keys</span>
       </Button>
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-40" 
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="absolute right-0 top-full mt-1.5 z-50 w-48 animate-scale-in origin-top-right">
-            <div className="bg-surface-elevated rounded-lg border border-border shadow-medium overflow-hidden">
-              <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute right-0 top-full z-50 mt-1.5 w-48 origin-top-right animate-scale-in">
+            <div className="overflow-hidden rounded-lg border border-border bg-surface-elevated shadow-medium">
+              <div className="flex items-center justify-between border-b border-border px-3 py-2">
                 <span className="text-xs font-medium">Shortcuts</span>
-                <button 
+                <button
                   onClick={() => setIsOpen(false)}
-                  className="text-text-muted hover:text-foreground transition-colors"
+                  className="text-text-muted transition-colors hover:text-foreground"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="h-3 w-3" />
                 </button>
               </div>
               <div className="p-1.5">
                 {shortcuts.map((shortcut, i) => (
-                  <div 
+                  <div
                     key={i}
-                    className="flex items-center justify-between px-2 py-1.5 rounded hover:bg-surface transition-colors"
+                    className="flex items-center justify-between rounded px-2 py-1.5 transition-colors hover:bg-surface"
                   >
                     <span className="text-2xs text-text-secondary">{shortcut.action}</span>
                     <div className="flex items-center gap-0.5">
                       {shortcut.keys.map((key, j) => (
-                        <span key={j} className="kbd">{key}</span>
+                        <span key={j} className="kbd">
+                          {key}
+                        </span>
                       ))}
                     </div>
                   </div>

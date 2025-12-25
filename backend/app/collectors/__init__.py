@@ -12,7 +12,11 @@ from app.collectors.official import OfficialSourcesCollector
 from app.collectors.bluesky import BlueskyCollector
 from app.collectors.lemmy import LemmyCollector
 from app.collectors.wikipedia import WikipediaCollector
-from app.collectors.newsapi import NewsDataCollector, CurrentsAPICollector, TheNewsAPICollector
+from app.collectors.newsapi import (
+    NewsDataCollector,
+    CurrentsAPICollector,
+    TheNewsAPICollector,
+)
 
 __all__ = [
     # Original collectors

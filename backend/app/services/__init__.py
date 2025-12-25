@@ -6,4 +6,3 @@ from app.services.aggregator import SentimentAggregator
 __all__ = [
     "SentimentAggregator",
 ]
-

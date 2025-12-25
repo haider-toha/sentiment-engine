@@ -18,14 +18,10 @@ const EARTH_TEXTURE_URL = '/earth-map.jpg'
 
 function EarthSphere() {
   const texture = useTexture(EARTH_TEXTURE_URL)
-  
+
   return (
     <Sphere args={[1, 64, 64]}>
-      <meshStandardMaterial
-        map={texture}
-        roughness={0.8}
-        metalness={0.1}
-      />
+      <meshStandardMaterial map={texture} roughness={0.8} metalness={0.1} />
     </Sphere>
   )
 }
@@ -33,20 +29,12 @@ function EarthSphere() {
 function FallbackSphere() {
   return (
     <Sphere args={[1, 64, 64]}>
-      <meshStandardMaterial
-        color="#1e3a5f"
-        roughness={0.8}
-        metalness={0.1}
-      />
+      <meshStandardMaterial color="#1e3a5f" roughness={0.8} metalness={0.1} />
     </Sphere>
   )
 }
 
-function GlobeMesh({
-  countries,
-  onCountrySelect,
-  selectedCountry,
-}: GlobeProps) {
+function GlobeMesh({ countries, onCountrySelect, selectedCountry }: GlobeProps) {
   const meshRef = useRef<THREE.Mesh>(null)
   const [hovered, setHovered] = useState<string | null>(null)
 
@@ -63,7 +51,7 @@ function GlobeMesh({
     const latLongToVector3 = (lat: number, lon: number, radius: number) => {
       const phi = (90 - lat) * (Math.PI / 180)
       const theta = (lon + 180) * (Math.PI / 180)
-      
+
       return new THREE.Vector3(
         -radius * Math.sin(phi) * Math.cos(theta),
         radius * Math.cos(phi),
@@ -110,24 +98,26 @@ function GlobeMesh({
       QA: [25.4, 51.2],
     }
 
-    return countries.map((country) => {
-      const center = countryCenters[country.country_code]
-      if (!center) return null
+    return countries
+      .map((country) => {
+        const center = countryCenters[country.country_code]
+        if (!center) return null
 
-      const position = latLongToVector3(center[0], center[1], 1.025)
-      const color = interpolateSentimentColor(country.sentiment_score)
-      const isSelected = selectedCountry === country.country_code
-      const isHovered = hovered === country.country_code
+        const position = latLongToVector3(center[0], center[1], 1.025)
+        const color = interpolateSentimentColor(country.sentiment_score)
+        const isSelected = selectedCountry === country.country_code
+        const isHovered = hovered === country.country_code
 
-      return {
-        ...country,
-        position,
-        color,
-        isSelected,
-        isHovered,
-        scale: isSelected || isHovered ? 0.045 : 0.028,
-      }
-    }).filter(Boolean)
+        return {
+          ...country,
+          position,
+          color,
+          isSelected,
+          isHovered,
+          scale: isSelected || isHovered ? 0.045 : 0.028,
+        }
+      })
+      .filter(Boolean)
   }, [countries, selectedCountry, hovered])
 
   return (
@@ -137,38 +127,39 @@ function GlobeMesh({
         <EarthSphere />
       </Suspense>
 
-
       {/* Country markers */}
-      {markers.map((marker) => marker && (
-        <mesh
-          key={marker.country_code}
-          position={marker.position}
-          onPointerOver={(e) => {
-            e.stopPropagation()
-            setHovered(marker.country_code)
-            document.body.style.cursor = 'pointer'
-          }}
-          onPointerOut={() => {
-            setHovered(null)
-            document.body.style.cursor = 'auto'
-          }}
-          onClick={(e) => {
-            e.stopPropagation()
-            onCountrySelect(
-              selectedCountry === marker.country_code ? null : marker.country_code
-            )
-          }}
-        >
-          <sphereGeometry args={[marker.scale, 16, 16]} />
-          <meshStandardMaterial
-            color={marker.color}
-            emissive={marker.color}
-            emissiveIntensity={marker.isSelected || marker.isHovered ? 0.6 : 0.3}
-            roughness={0.4}
-          />
-        </mesh>
-      ))}
-
+      {markers.map(
+        (marker) =>
+          marker && (
+            <mesh
+              key={marker.country_code}
+              position={marker.position}
+              onPointerOver={(e) => {
+                e.stopPropagation()
+                setHovered(marker.country_code)
+                document.body.style.cursor = 'pointer'
+              }}
+              onPointerOut={() => {
+                setHovered(null)
+                document.body.style.cursor = 'auto'
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                onCountrySelect(
+                  selectedCountry === marker.country_code ? null : marker.country_code
+                )
+              }}
+            >
+              <sphereGeometry args={[marker.scale, 16, 16]} />
+              <meshStandardMaterial
+                color={marker.color}
+                emissive={marker.color}
+                emissiveIntensity={marker.isSelected || marker.isHovered ? 0.6 : 0.3}
+                roughness={0.4}
+              />
+            </mesh>
+          )
+      )}
     </group>
   )
 }
@@ -180,13 +171,13 @@ function Scene({ countries, onCountrySelect, selectedCountry }: GlobeProps) {
       <directionalLight position={[5, 3, 5]} intensity={1.5} color="#ffffff" />
       <directionalLight position={[-3, -2, -3]} intensity={0.4} color="#6eb5ff" />
       <pointLight position={[0, 0, 4]} intensity={0.6} color="#ffffff" />
-      
+
       <GlobeMesh
         countries={countries}
         onCountrySelect={onCountrySelect}
         selectedCountry={selectedCountry}
       />
-      
+
       <OrbitControls
         enableZoom={true}
         enablePan={false}
@@ -200,13 +191,9 @@ function Scene({ countries, onCountrySelect, selectedCountry }: GlobeProps) {
   )
 }
 
-export default function Globe({
-  countries,
-  onCountrySelect,
-  selectedCountry,
-}: GlobeProps) {
+export default function Globe({ countries, onCountrySelect, selectedCountry }: GlobeProps) {
   return (
-    <div className="w-full h-full min-h-[500px]" style={{ backgroundColor: '#FAFAF9' }}>
+    <div className="h-full min-h-[500px] w-full" style={{ backgroundColor: '#FAFAF9' }}>
       <Canvas
         camera={{ position: [0, 0, 2.8], fov: 42 }}
         gl={{ antialias: true, alpha: true }}
@@ -221,4 +208,3 @@ export default function Globe({
     </div>
   )
 }
-

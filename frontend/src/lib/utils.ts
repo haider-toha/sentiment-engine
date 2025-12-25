@@ -47,7 +47,7 @@ export function formatRelativeTime(date: Date | string): string {
   if (diffMins < 60) return `${diffMins}m ago`
   if (diffHours < 24) return `${diffHours}h ago`
   if (diffDays < 7) return `${diffDays}d ago`
-  
+
   return then.toLocaleDateString()
 }
 
@@ -64,14 +64,14 @@ export function clamp(value: number, min: number, max: number): number {
 export function interpolateSentimentColor(score: number): string {
   // Clamp score to -1 to 1
   const s = clamp(score, -1, 1)
-  
+
   // Color values
   const negative = { r: 196, g: 131, b: 122 } // #C4837A
-  const neutral = { r: 184, g: 168, b: 152 }  // #B8A898
+  const neutral = { r: 184, g: 168, b: 152 } // #B8A898
   const positive = { r: 107, g: 142, b: 107 } // #6B8E6B
-  
+
   let r, g, b
-  
+
   if (s < 0) {
     // Interpolate between negative and neutral
     const t = s + 1 // 0 to 1
@@ -85,7 +85,6 @@ export function interpolateSentimentColor(score: number): string {
     g = Math.round(neutral.g + (positive.g - neutral.g) * t)
     b = Math.round(neutral.b + (positive.b - neutral.b) * t)
   }
-  
+
   return `rgb(${r}, ${g}, ${b})`
 }
-

@@ -23,36 +23,36 @@ sentiment_analyzer: SentimentAnalyzer = None
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     global sentiment_analyzer
-    
+
     # Startup
     setup_logging()
-    
+
     if settings.readonly_mode:
         logger.info("Starting Sentiment Engine in READ-ONLY mode...")
     else:
         logger.info("Starting Sentiment Engine...")
-    
+
     # Initialize database
     logger.info("Initializing database...")
     init_db()
-    
+
     # Only load ML model and scheduler in full mode (not read-only)
     if not settings.readonly_mode:
         # Initialize sentiment analyzer
         logger.info("Loading sentiment model...", model=settings.sentiment_model)
         sentiment_analyzer = SentimentAnalyzer()
         app.state.sentiment_analyzer = sentiment_analyzer
-        
+
         # Start scheduler
         logger.info("Starting scheduler...")
         start_scheduler()
     else:
         logger.info("Skipping ML model and scheduler (read-only mode)")
-    
+
     logger.info("Sentiment Engine started successfully!")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Sentiment Engine...")
     if not settings.readonly_mode:
@@ -88,4 +88,3 @@ async def root():
         "version": "1.0.0",
         "docs": "/docs",
     }
-

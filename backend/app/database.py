@@ -41,5 +41,5 @@ def get_db():
 def init_db():
     """Initialize database tables."""
     from app import models  # noqa: F401
-    Base.metadata.create_all(bind=engine)
 
+    Base.metadata.create_all(bind=engine)

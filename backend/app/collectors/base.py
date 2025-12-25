@@ -9,6 +9,7 @@ from datetime import datetime
 @dataclass
 class CollectedArticle:
     """Standardized article data from any source."""
+
     source_type: str
     source_name: str
     title: str
@@ -20,24 +21,23 @@ class CollectedArticle:
 
 class BaseCollector(ABC):
     """Abstract base class for data collectors."""
-    
+
     source_type: str = "unknown"
-    
+
     @abstractmethod
     async def collect(self) -> List[CollectedArticle]:
         """Collect articles from the data source.
-        
+
         Returns:
             List of collected articles
         """
         pass
-    
+
     @abstractmethod
     def is_configured(self) -> bool:
         """Check if the collector is properly configured.
-        
+
         Returns:
             True if the collector can run, False otherwise
         """
         pass
-

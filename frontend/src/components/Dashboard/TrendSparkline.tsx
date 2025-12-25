@@ -1,14 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import {
-  LineChart,
-  Line,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { HourlyTrend } from '@/lib/api'
 import { interpolateSentimentColor } from '@/lib/utils'
 
@@ -35,10 +28,7 @@ export default function TrendSparkline({
 
   if (data.length === 0) {
     return (
-      <div 
-        className="flex items-center justify-center text-text-muted text-sm"
-        style={{ height }}
-      >
+      <div className="flex items-center justify-center text-sm text-text-muted" style={{ height }}>
         No data
       </div>
     )
@@ -87,4 +77,3 @@ export default function TrendSparkline({
     </ResponsiveContainer>
   )
 }
-

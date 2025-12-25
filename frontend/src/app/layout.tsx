@@ -23,14 +23,10 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${dmMono.variable}`}>
-      <body className="antialiased font-sans">{children}</body>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   )
 }

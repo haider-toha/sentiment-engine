@@ -22,6 +22,7 @@ settings = get_settings()
 @dataclass
 class SentimentResult:
     """Result of sentiment analysis."""
+
     score: float  # -1 to 1
     label: str  # positive, negative, neutral
     confidence: float  # 0 to 1
@@ -79,8 +80,12 @@ LABEL_MAPPINGS: Dict[str, Dict[str, tuple]] = {
 def get_model_type(model_name: str) -> str:
     """Determine the model type from the model name for label mapping."""
     model_lower = model_name.lower()
-    
-    if "cardiffnlp" in model_lower or "twitter" in model_lower and "roberta" in model_lower:
+
+    if (
+        "cardiffnlp" in model_lower
+        or "twitter" in model_lower
+        and "roberta" in model_lower
+    ):
         return "cardiffnlp"
     elif "finbert" in model_lower:
         return "finbert"
@@ -96,45 +101,51 @@ def get_model_type(model_name: str) -> str:
 
 class SentimentAnalyzer:
     """Sentiment analyzer using HuggingFace transformers.
-    
+
     Supports multilingual sentiment analysis with various models.
     Recommended: cardiffnlp/twitter-xlm-roberta-base-sentiment for multilingual news.
     """
-    
+
     def __init__(self):
         self._model = None
         self._is_ready = False
         self._model_type = "default"
         self._load_model()
-    
+
     def _load_model(self):
         """Load the sentiment analysis model."""
         try:
             import torch
-            from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
-            
+            from transformers import (
+                pipeline,
+                AutoModelForSequenceClassification,
+                AutoTokenizer,
+            )
+
             # Determine device
             if settings.use_gpu and torch.cuda.is_available():
                 device = 0
                 gpu_name = torch.cuda.get_device_name(0)
                 gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1024**3
                 logger.info(
-                    "Using GPU for inference", 
+                    "Using GPU for inference",
                     device=gpu_name,
-                    memory_gb=f"{gpu_memory:.1f}"
+                    memory_gb=f"{gpu_memory:.1f}",
                 )
             else:
                 device = -1
                 logger.info("Using CPU for inference")
-            
+
             # Determine model type for label mapping
             self._model_type = get_model_type(settings.sentiment_model)
             logger.info("Model type detected", model_type=self._model_type)
-            
+
             # Load tokenizer and model explicitly for better control
             tokenizer = AutoTokenizer.from_pretrained(settings.sentiment_model)
-            model = AutoModelForSequenceClassification.from_pretrained(settings.sentiment_model)
-            
+            model = AutoModelForSequenceClassification.from_pretrained(
+                settings.sentiment_model
+            )
+
             # Create pipeline
             self._model = pipeline(
                 "sentiment-analysis",
@@ -145,37 +156,37 @@ class SentimentAnalyzer:
                 max_length=512,
                 top_k=None,  # Return all scores for better analysis
             )
-            
+
             self._is_ready = True
             logger.info(
-                "Sentiment model loaded successfully", 
+                "Sentiment model loaded successfully",
                 model=settings.sentiment_model,
-                model_type=self._model_type
+                model_type=self._model_type,
             )
-        
+
         except Exception as e:
             logger.error("Failed to load sentiment model", error=str(e))
             self._is_ready = False
-    
+
     @property
     def is_ready(self) -> bool:
         """Check if the model is ready for inference."""
         return self._is_ready
-    
+
     def analyze(self, text: str) -> Optional[SentimentResult]:
         """Analyze sentiment of a single text."""
         if not self._is_ready or not text:
             return None
-        
+
         try:
             # Clean text
             cleaned = self._clean_text(text)
             if len(cleaned) < 10:
                 return None
-            
+
             # Run inference
             result = self._model(cleaned[:512])
-            
+
             # Handle both single result and list of results (top_k=None returns list)
             if isinstance(result, list) and len(result) > 0:
                 if isinstance(result[0], list):
@@ -185,23 +196,23 @@ class SentimentAnalyzer:
                 best_result = max(result, key=lambda x: x["score"])
             else:
                 best_result = result
-            
+
             # Convert to standardized format
             return self._convert_result(best_result)
-        
+
         except Exception as e:
             logger.debug("Sentiment analysis failed", error=str(e))
             return None
-    
+
     def analyze_batch(self, texts: List[str]) -> List[Optional[SentimentResult]]:
         """Analyze sentiment of multiple texts efficiently."""
         if not self._is_ready or not texts:
             return [None] * len(texts)
-        
+
         try:
             # Clean texts
             cleaned = [self._clean_text(t)[:512] for t in texts]
-            
+
             # Filter out too-short texts but remember indices
             valid_indices = []
             valid_texts = []
@@ -209,10 +220,10 @@ class SentimentAnalyzer:
                 if len(text) >= 10:
                     valid_indices.append(i)
                     valid_texts.append(text)
-            
+
             if not valid_texts:
                 return [None] * len(texts)
-            
+
             # Batch inference - disable top_k for batch processing (faster)
             results = self._model(
                 valid_texts,
@@ -220,7 +231,7 @@ class SentimentAnalyzer:
                 truncation=True,
                 top_k=1,  # Only get top result for batch (faster)
             )
-            
+
             # Map results back to original indices
             output = [None] * len(texts)
             for idx, result in zip(valid_indices, results):
@@ -228,43 +239,43 @@ class SentimentAnalyzer:
                 if isinstance(result, list) and len(result) > 0:
                     result = result[0]
                 output[idx] = self._convert_result(result)
-            
+
             return output
-        
+
         except Exception as e:
             logger.error("Batch sentiment analysis failed", error=str(e))
             return [None] * len(texts)
-    
+
     def _clean_text(self, text: str) -> str:
         """Clean text for analysis."""
         if not text:
             return ""
-        
+
         # Remove URLs
-        text = re.sub(r'https?://\S+', '', text)
-        
+        text = re.sub(r"https?://\S+", "", text)
+
         # Remove HTML tags
-        text = re.sub(r'<[^>]+>', '', text)
-        
+        text = re.sub(r"<[^>]+>", "", text)
+
         # Remove excessive special characters but keep unicode (for multilingual)
-        text = re.sub(r'[#@]\w+', '', text)  # Remove hashtags and mentions
-        
+        text = re.sub(r"[#@]\w+", "", text)  # Remove hashtags and mentions
+
         # Remove extra whitespace
-        text = re.sub(r'\s+', ' ', text)
-        
+        text = re.sub(r"\s+", " ", text)
+
         return text.strip()
-    
+
     def _convert_result(self, result: dict) -> SentimentResult:
         """Convert model output to standardized SentimentResult.
-        
+
         Handles different label formats from various models.
         """
         raw_label = result["label"].lower().strip()
         confidence = result["score"]
-        
+
         # Get label mapping for this model type
         label_map = LABEL_MAPPINGS.get(self._model_type, LABEL_MAPPINGS["default"])
-        
+
         # Try to find the label in our mapping
         if raw_label in label_map:
             normalized_label, score_multiplier = label_map[raw_label]
@@ -276,19 +287,16 @@ class SentimentAnalyzer:
                 normalized_label, score_multiplier = "negative", -1.0
             else:
                 normalized_label, score_multiplier = "neutral", 0.0
-            
+
             logger.debug(
-                "Unknown label mapped", 
-                raw_label=raw_label, 
-                mapped_to=normalized_label
+                "Unknown label mapped", raw_label=raw_label, mapped_to=normalized_label
             )
-        
+
         # Calculate score: confidence weighted by sentiment direction
         score = confidence * score_multiplier
-        
+
         return SentimentResult(
             score=score,
             label=normalized_label,
             confidence=confidence,
         )
-

@@ -707,27 +707,27 @@ SOURCE_COUNTRIES = {
 
 def normalize_country_name(name: str) -> str:
     """Normalize country name for lookup."""
-    return re.sub(r'[^a-z\s]', '', name.lower().strip())
+    return re.sub(r"[^a-z\s]", "", name.lower().strip())
 
 
 def get_country_code(name: str) -> Optional[str]:
     """Get ISO 3166-1 alpha-2 country code from name."""
     if not name:
         return None
-    
+
     normalized = normalize_country_name(name)
-    
+
     # Check aliases first
     if normalized in COUNTRY_ALIASES:
         return COUNTRY_ALIASES[normalized]
-    
+
     # Try pycountry lookup
     try:
         country = pycountry.countries.lookup(name)
         return country.alpha_2
     except LookupError:
         pass
-    
+
     # Try fuzzy search
     try:
         results = pycountry.countries.search_fuzzy(name)
@@ -735,7 +735,7 @@ def get_country_code(name: str) -> Optional[str]:
             return results[0].alpha_2
     except LookupError:
         pass
-    
+
     return None
 
 
@@ -743,14 +743,14 @@ def get_country_name(code: str) -> str:
     """Get country name from ISO code."""
     if not code:
         return "Unknown"
-    
+
     try:
         country = pycountry.countries.get(alpha_2=code.upper())
         if country:
             return country.name
     except (LookupError, AttributeError):
         pass
-    
+
     return code.upper()
 
 
@@ -763,16 +763,16 @@ def get_country_from_subreddit(subreddit: str) -> Optional[str]:
 def get_country_from_source(source_name: str) -> Optional[str]:
     """Get country code from news source name."""
     normalized = source_name.lower().strip()
-    
+
     # Direct lookup
     if normalized in SOURCE_COUNTRIES:
         return SOURCE_COUNTRIES[normalized]
-    
+
     # Partial match
     for source, code in SOURCE_COUNTRIES.items():
         if source in normalized or normalized in source:
             return code
-    
+
     return None
 
 
@@ -784,67 +784,73 @@ def detect_country_from_text(text: str, title: str = None) -> Optional[str]:
     """
     if not text and not title:
         return None
-    
+
     # Combine title (weighted more) and text
     combined = ""
     if title:
         combined += (title.lower() + " ") * 3  # Weight title 3x
     if text:
         combined += text.lower()
-    
+
     # Count country mentions
     country_counts: dict[str, int] = {}
-    
+
     # Sort aliases by length (longest first) to match longer phrases first
-    sorted_aliases = sorted(COUNTRY_ALIASES.items(), key=lambda x: len(x[0]), reverse=True)
-    
+    sorted_aliases = sorted(
+        COUNTRY_ALIASES.items(), key=lambda x: len(x[0]), reverse=True
+    )
+
     for alias, code in sorted_aliases:
         if code is None:
             continue
-        
+
         # Use word boundaries to avoid partial matches
         # e.g., "german" shouldn't match in "germander"
-        pattern = r'\b' + re.escape(alias) + r'\b'
+        pattern = r"\b" + re.escape(alias) + r"\b"
         matches = len(re.findall(pattern, combined, re.IGNORECASE))
-        
+
         if matches > 0:
             country_counts[code] = country_counts.get(code, 0) + matches
-    
+
     if not country_counts:
         return None
-    
+
     # Return the country with most mentions
     return max(country_counts.items(), key=lambda x: x[1])[0]
 
 
-def extract_all_countries_from_text(text: str, title: str = None) -> List[Tuple[str, int]]:
+def extract_all_countries_from_text(
+    text: str, title: str = None
+) -> List[Tuple[str, int]]:
     """
     Extract all countries mentioned in text with their mention counts.
     Returns list of (country_code, count) tuples sorted by count descending.
     """
     if not text and not title:
         return []
-    
+
     combined = ""
     if title:
         combined += (title.lower() + " ") * 3
     if text:
         combined += text.lower()
-    
+
     country_counts: dict[str, int] = {}
-    
-    sorted_aliases = sorted(COUNTRY_ALIASES.items(), key=lambda x: len(x[0]), reverse=True)
-    
+
+    sorted_aliases = sorted(
+        COUNTRY_ALIASES.items(), key=lambda x: len(x[0]), reverse=True
+    )
+
     for alias, code in sorted_aliases:
         if code is None:
             continue
-        
-        pattern = r'\b' + re.escape(alias) + r'\b'
+
+        pattern = r"\b" + re.escape(alias) + r"\b"
         matches = len(re.findall(pattern, combined, re.IGNORECASE))
-        
+
         if matches > 0:
             country_counts[code] = country_counts.get(code, 0) + matches
-    
+
     return sorted(country_counts.items(), key=lambda x: x[1], reverse=True)
 
 

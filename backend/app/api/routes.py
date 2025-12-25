@@ -27,20 +27,20 @@ router = APIRouter()
 async def health_check(db: Session = Depends(get_db)):
     """Health check endpoint with system status."""
     status = scheduler_status()
-    
+
     # Count today's articles
     today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-    articles_today = db.query(func.count(Article.id)).filter(
-        Article.created_at >= today
-    ).scalar()
-    
+    articles_today = (
+        db.query(func.count(Article.id)).filter(Article.created_at >= today).scalar()
+    )
+
     # Check database
     try:
         db.execute(text("SELECT 1"))
         db_ok = True
     except Exception:
         db_ok = False
-    
+
     return HealthStatus(
         status="healthy" if status["running"] else "degraded",
         last_collection=status["last_collection"],
@@ -55,7 +55,7 @@ async def get_global_sentiment(db: Session = Depends(get_db)):
     """Get global sentiment overview for all countries."""
     aggregator = SentimentAggregator(db)
     data = aggregator.get_global_sentiment()
-    
+
     return GlobalSentiment(
         countries=[
             CountryData(
@@ -74,17 +74,15 @@ async def get_global_sentiment(db: Session = Depends(get_db)):
 
 @router.get("/sentiment/{country_code}", response_model=CountryDetail)
 async def get_country_sentiment(
-    country_code: str,
-    hours: int = 24,
-    db: Session = Depends(get_db)
+    country_code: str, hours: int = 24, db: Session = Depends(get_db)
 ):
     """Get detailed sentiment data for a specific country."""
     aggregator = SentimentAggregator(db)
     data = aggregator.get_country_detail(country_code.upper(), hours=hours)
-    
+
     if not data:
         raise HTTPException(status_code=404, detail="Country not found or no data")
-    
+
     return CountryDetail(
         country_code=data["country_code"],
         country_name=data["country_name"],
@@ -108,14 +106,14 @@ async def get_country_headlines(
     country_code: str,
     limit: int = 20,
     sentiment: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get recent headlines for a country."""
     query = db.query(Article).filter(
         Article.country_code == country_code.upper(),
         Article.sentiment_score.isnot(None),
     )
-    
+
     # Filter by sentiment if specified
     if sentiment == "positive":
         query = query.filter(Article.sentiment_score > 0.2)
@@ -123,13 +121,14 @@ async def get_country_headlines(
         query = query.filter(Article.sentiment_score < -0.2)
     elif sentiment == "neutral":
         query = query.filter(
-            Article.sentiment_score >= -0.2,
-            Article.sentiment_score <= 0.2
+            Article.sentiment_score >= -0.2, Article.sentiment_score <= 0.2
         )
-    
+
     # Order by absolute sentiment score (most extreme first)
-    headlines = query.order_by(func.abs(Article.sentiment_score).desc()).limit(limit).all()
-    
+    headlines = (
+        query.order_by(func.abs(Article.sentiment_score).desc()).limit(limit).all()
+    )
+
     return [
         {
             "id": h.id,
@@ -150,21 +149,21 @@ async def get_country_headlines(
 async def get_trends(hours: int = 24, db: Session = Depends(get_db)):
     """Get global sentiment trends over time."""
     since = datetime.utcnow() - timedelta(hours=hours)
-    
+
     # Get hourly averages across all countries
-    hourly = db.query(
-        CountrySentiment.hour,
-        func.avg(CountrySentiment.weighted_sentiment).label("avg_sentiment"),
-        func.sum(CountrySentiment.article_count).label("total_articles"),
-        func.count(CountrySentiment.country_code).label("country_count"),
-    ).filter(
-        CountrySentiment.hour >= since
-    ).group_by(
-        CountrySentiment.hour
-    ).order_by(
-        CountrySentiment.hour.asc()
-    ).all()
-    
+    hourly = (
+        db.query(
+            CountrySentiment.hour,
+            func.avg(CountrySentiment.weighted_sentiment).label("avg_sentiment"),
+            func.sum(CountrySentiment.article_count).label("total_articles"),
+            func.count(CountrySentiment.country_code).label("country_count"),
+        )
+        .filter(CountrySentiment.hour >= since)
+        .group_by(CountrySentiment.hour)
+        .order_by(CountrySentiment.hour.asc())
+        .all()
+    )
+
     return [
         {
             "hour": h.hour,
@@ -180,17 +179,18 @@ async def get_trends(hours: int = 24, db: Session = Depends(get_db)):
 async def get_source_stats(db: Session = Depends(get_db)):
     """Get statistics by data source."""
     today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-    
-    stats = db.query(
-        Article.source_type,
-        func.count(Article.id).label("count"),
-        func.avg(Article.sentiment_score).label("avg_sentiment"),
-    ).filter(
-        Article.created_at >= today
-    ).group_by(
-        Article.source_type
-    ).all()
-    
+
+    stats = (
+        db.query(
+            Article.source_type,
+            func.count(Article.id).label("count"),
+            func.avg(Article.sentiment_score).label("avg_sentiment"),
+        )
+        .filter(Article.created_at >= today)
+        .group_by(Article.source_type)
+        .all()
+    )
+
     return [
         {
             "source_type": s.source_type,
@@ -206,4 +206,3 @@ async def trigger_collection_job(background_tasks: BackgroundTasks):
     """Manually trigger a data collection job."""
     background_tasks.add_task(trigger_collection)
     return {"message": "Collection job triggered", "status": "running"}
-

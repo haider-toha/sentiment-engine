@@ -8,8 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 const Globe = dynamic(() => import('./Globe'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full min-h-[400px] flex items-center justify-center">
-      <Skeleton className="w-64 h-64 rounded-full" />
+    <div className="flex h-full min-h-[400px] w-full items-center justify-center">
+      <Skeleton className="h-64 w-64 rounded-full" />
     </div>
   ),
 })
@@ -33,4 +33,3 @@ export default function GlobeWrapper({
     />
   )
 }
-

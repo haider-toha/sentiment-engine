@@ -13,8 +13,8 @@ interface HeadlinesListProps {
   compact?: boolean
 }
 
-export default function HeadlinesList({ 
-  headlines, 
+export default function HeadlinesList({
+  headlines,
   maxItems = 10,
   compact = false,
 }: HeadlinesListProps) {
@@ -22,9 +22,9 @@ export default function HeadlinesList({
 
   if (displayHeadlines.length === 0) {
     return (
-      <div className="text-center py-10">
-        <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center mx-auto mb-3">
-          <FileText className="w-5 h-5 text-text-muted" />
+      <div className="py-10 text-center">
+        <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-surface">
+          <FileText className="h-5 w-5 text-text-muted" />
         </div>
         <p className="text-sm text-text-muted">No headlines available</p>
       </div>
@@ -35,11 +35,12 @@ export default function HeadlinesList({
     <div className={cn('space-y-2', !compact && 'animate-stagger')}>
       {displayHeadlines.map((headline) => {
         const sentimentColor = interpolateSentimentColor(headline.sentiment_score)
-        const badgeVariant = headline.sentiment_label === 'positive' 
-          ? 'positive' 
-          : headline.sentiment_label === 'negative' 
-            ? 'negative' 
-            : 'neutral'
+        const badgeVariant =
+          headline.sentiment_label === 'positive'
+            ? 'positive'
+            : headline.sentiment_label === 'negative'
+              ? 'negative'
+              : 'neutral'
 
         return (
           <a
@@ -50,68 +51,68 @@ export default function HeadlinesList({
             className={cn(
               'block rounded-lg border border-border/50 hover:border-border',
               'bg-surface-elevated hover:bg-surface',
-              'transition-all duration-150 group',
+              'group transition-all duration-150',
               compact ? 'p-2.5' : 'p-3'
             )}
           >
             <div className="flex items-start gap-2.5">
               {/* Source icon */}
               <div className="flex-shrink-0 pt-0.5">
-                <SourceIcon 
-                  source={headline.source_type || 'rss'} 
-                  size={compact ? 'sm' : 'md'}
-                />
+                <SourceIcon source={headline.source_type || 'rss'} size={compact ? 'sm' : 'md'} />
               </div>
 
               {/* Content */}
-              <div className="flex-1 min-w-0">
-                <h4 className={cn(
-                  'leading-snug line-clamp-2 group-hover:text-foreground transition-colors',
-                  compact ? 'text-xs' : 'text-sm'
-                )}>
+              <div className="min-w-0 flex-1">
+                <h4
+                  className={cn(
+                    'line-clamp-2 leading-snug transition-colors group-hover:text-foreground',
+                    compact ? 'text-xs' : 'text-sm'
+                  )}
+                >
                   {headline.title}
                 </h4>
-                
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <span className={cn(
-                    'text-text-muted truncate max-w-[100px]',
-                    compact ? 'text-2xs' : 'text-xs'
-                  )}>
+
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <span
+                    className={cn(
+                      'max-w-[100px] truncate text-text-muted',
+                      compact ? 'text-2xs' : 'text-xs'
+                    )}
+                  >
                     {headline.source_name}
                   </span>
                   {headline.published_at && (
                     <>
-                      <span className="text-text-muted text-2xs">·</span>
-                      <span className={cn(
-                        'text-text-muted',
-                        compact ? 'text-2xs' : 'text-xs'
-                      )}>
+                      <span className="text-2xs text-text-muted">·</span>
+                      <span className={cn('text-text-muted', compact ? 'text-2xs' : 'text-xs')}>
                         {formatRelativeTime(headline.published_at)}
                       </span>
                     </>
                   )}
                 </div>
               </div>
-              
+
               {/* Right side */}
-              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                <Badge variant={badgeVariant} className={compact ? 'text-2xs px-1.5 py-0' : ''}>
-                  {compact 
-                    ? (headline.sentiment_score >= 0 ? '+' : '') + (headline.sentiment_score * 100).toFixed(0)
-                    : headline.sentiment_label
-                  }
+              <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
+                <Badge variant={badgeVariant} className={compact ? 'px-1.5 py-0 text-2xs' : ''}>
+                  {compact
+                    ? (headline.sentiment_score >= 0 ? '+' : '') +
+                      (headline.sentiment_score * 100).toFixed(0)
+                    : headline.sentiment_label}
                 </Badge>
-                <ArrowUpRight className={cn(
-                  'text-text-muted opacity-0 group-hover:opacity-100 transition-opacity',
-                  compact ? 'w-3 h-3' : 'w-3.5 h-3.5'
-                )} />
+                <ArrowUpRight
+                  className={cn(
+                    'text-text-muted opacity-0 transition-opacity group-hover:opacity-100',
+                    compact ? 'h-3 w-3' : 'h-3.5 w-3.5'
+                  )}
+                />
               </div>
             </div>
-            
+
             {/* Sentiment bar */}
             {!compact && (
               <div className="mt-2.5 flex items-center gap-2.5">
-                <div className="flex-1 h-0.5 bg-border/50 rounded-full overflow-hidden">
+                <div className="h-0.5 flex-1 overflow-hidden rounded-full bg-border/50">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
@@ -120,11 +121,9 @@ export default function HeadlinesList({
                     }}
                   />
                 </div>
-                <span 
-                  className="text-2xs font-mono tabular-nums"
-                  style={{ color: sentimentColor }}
-                >
-                  {headline.sentiment_score >= 0 ? '+' : ''}{(headline.sentiment_score * 100).toFixed(0)}
+                <span className="font-mono text-2xs tabular-nums" style={{ color: sentimentColor }}>
+                  {headline.sentiment_score >= 0 ? '+' : ''}
+                  {(headline.sentiment_score * 100).toFixed(0)}
                 </span>
               </div>
             )}

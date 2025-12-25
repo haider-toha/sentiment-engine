@@ -4,19 +4,19 @@
 
 :root {
   /* Warm color scheme */
-  --background: #FAFAF9;
-  --surface: #F5F5F4;
-  --surface-elevated: #FFFFFF;
-  --border: #E7E5E4;
-  --border-subtle: #F0EEEC;
-  --foreground: #1C1917;
-  --text-secondary: #78716C;
-  --text-muted: #A8A29E;
-  --positive: #6B8E6B;
-  --neutral: #B8A898;
-  --negative: #C4837A;
+  --background: #fafaf9;
+  --surface: #f5f5f4;
+  --surface-elevated: #ffffff;
+  --border: #e7e5e4;
+  --border-subtle: #f0eeec;
+  --foreground: #1c1917;
+  --text-secondary: #78716c;
+  --text-muted: #a8a29e;
+  --positive: #6b8e6b;
+  --neutral: #b8a898;
+  --negative: #c4837a;
   --accent: #525252;
-  
+
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(28, 25, 23, 0.03);
   --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.04), 0 1px 2px rgba(28, 25, 23, 0.02);
@@ -39,10 +39,15 @@ body {
   overflow-x: hidden;
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    var(--font-inter),
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "cv11", "ss01", "ss03";
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
   letter-spacing: -0.01em;
 }
 
@@ -66,7 +71,8 @@ body {
 }
 
 /* Smooth transitions */
-a, button {
+a,
+button {
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -90,7 +96,7 @@ a, button {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
-  
+
   .glass-subtle {
     background: rgba(250, 250, 249, 0.85);
     backdrop-filter: blur(10px);
@@ -115,16 +121,36 @@ a, button {
   opacity: 0;
 }
 
-.animate-stagger > *:nth-child(1) { animation-delay: 0.03s; }
-.animate-stagger > *:nth-child(2) { animation-delay: 0.06s; }
-.animate-stagger > *:nth-child(3) { animation-delay: 0.09s; }
-.animate-stagger > *:nth-child(4) { animation-delay: 0.12s; }
-.animate-stagger > *:nth-child(5) { animation-delay: 0.15s; }
-.animate-stagger > *:nth-child(6) { animation-delay: 0.18s; }
-.animate-stagger > *:nth-child(7) { animation-delay: 0.21s; }
-.animate-stagger > *:nth-child(8) { animation-delay: 0.24s; }
-.animate-stagger > *:nth-child(9) { animation-delay: 0.27s; }
-.animate-stagger > *:nth-child(10) { animation-delay: 0.30s; }
+.animate-stagger > *:nth-child(1) {
+  animation-delay: 0.03s;
+}
+.animate-stagger > *:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.animate-stagger > *:nth-child(3) {
+  animation-delay: 0.09s;
+}
+.animate-stagger > *:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.animate-stagger > *:nth-child(5) {
+  animation-delay: 0.15s;
+}
+.animate-stagger > *:nth-child(6) {
+  animation-delay: 0.18s;
+}
+.animate-stagger > *:nth-child(7) {
+  animation-delay: 0.21s;
+}
+.animate-stagger > *:nth-child(8) {
+  animation-delay: 0.24s;
+}
+.animate-stagger > *:nth-child(9) {
+  animation-delay: 0.27s;
+}
+.animate-stagger > *:nth-child(10) {
+  animation-delay: 0.3s;
+}
 
 /* Pulsing live indicator */
 @keyframes pulse-ring {
@@ -154,7 +180,9 @@ a, button {
 
 /* Hover lift */
 .hover-lift {
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-lift:hover {
@@ -164,8 +192,12 @@ a, button {
 
 /* Skeleton shimmer */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton-shimmer {
@@ -194,7 +226,7 @@ a, button {
 /* Tabular numbers */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum";
+  font-feature-settings: 'tnum';
 }
 
 /* Uppercase tracking */

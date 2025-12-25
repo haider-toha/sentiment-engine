@@ -16,21 +16,20 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center max-w-md px-6">
-        <div className="w-16 h-16 rounded-full bg-negative/10 flex items-center justify-center mx-auto mb-6">
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="max-w-md px-6 text-center">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-negative/10">
           <span className="text-2xl">⚠️</span>
         </div>
-        <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
-        <p className="text-text-secondary mb-6">
+        <h2 className="mb-2 text-xl font-semibold">Something went wrong</h2>
+        <p className="mb-6 text-text-secondary">
           We couldn&apos;t load the sentiment data. This might be a temporary issue.
         </p>
         <Button onClick={reset}>
-          <RefreshCw className="w-4 h-4 mr-2" />
+          <RefreshCw className="mr-2 h-4 w-4" />
           Try again
         </Button>
       </div>
     </div>
   )
 }
-

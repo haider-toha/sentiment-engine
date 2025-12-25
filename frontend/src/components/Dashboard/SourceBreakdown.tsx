@@ -33,18 +33,14 @@ export default function SourceBreakdown({ data }: SourceBreakdownProps) {
   }, [data])
 
   if (chartData.length === 0) {
-    return (
-      <div className="text-center py-8 text-text-muted text-sm">
-        No source data available
-      </div>
-    )
+    return <div className="py-8 text-center text-sm text-text-muted">No source data available</div>
   }
 
   const total = chartData.reduce((acc, d) => acc + d.value, 0)
 
   return (
     <div className="flex items-center gap-4">
-      <div className="w-24 h-24 flex-shrink-0">
+      <div className="h-24 w-24 flex-shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -71,18 +67,15 @@ export default function SourceBreakdown({ data }: SourceBreakdownProps) {
           </PieChart>
         </ResponsiveContainer>
       </div>
-      
+
       <div className="flex-1 space-y-1.5">
         {chartData.map((entry) => (
           <div key={entry.name} className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: entry.color }}
-              />
+              <div className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
               <span className="text-text-secondary">{entry.name}</span>
             </div>
-            <span className="text-text-muted tabular-nums">
+            <span className="tabular-nums text-text-muted">
               {entry.value} ({Math.round((entry.value / total) * 100)}%)
             </span>
           </div>
@@ -91,4 +84,3 @@ export default function SourceBreakdown({ data }: SourceBreakdownProps) {
     </div>
   )
 }
-

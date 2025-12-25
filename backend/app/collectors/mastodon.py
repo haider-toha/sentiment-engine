@@ -91,22 +91,22 @@ MASTODON_INSTANCES = [
 
 class MastodonCollector(BaseCollector):
     """Collector for Mastodon public timeline."""
-    
+
     source_type = "mastodon"
-    
+
     def __init__(self, timeout: float = 30.0):
         self.timeout = timeout
         self.client = httpx.AsyncClient(timeout=timeout)
         self.base_url = settings.mastodon_api_base_url.rstrip("/")
-    
+
     def is_configured(self) -> bool:
         """Mastodon public timeline works without auth."""
         return True
-    
+
     async def collect(self) -> List[CollectedArticle]:
         """Collect posts from multiple Mastodon instances."""
         articles = []
-        
+
         # Collect from main configured instance
         try:
             posts = await self._fetch_public_timeline(self.base_url, limit=100)
@@ -114,15 +114,21 @@ class MastodonCollector(BaseCollector):
                 article = self._parse_post(post)
                 if article:
                     articles.append(article)
-            logger.info("Fetched Mastodon posts", instance=self.base_url, count=len(articles))
+            logger.info(
+                "Fetched Mastodon posts", instance=self.base_url, count=len(articles)
+            )
         except Exception as e:
-            logger.warning("Failed to fetch Mastodon timeline", instance=self.base_url, error=str(e))
-        
+            logger.warning(
+                "Failed to fetch Mastodon timeline",
+                instance=self.base_url,
+                error=str(e),
+            )
+
         # Also collect from other instances for more coverage
         for instance_url in MASTODON_INSTANCES:
             if instance_url.rstrip("/") == self.base_url:
                 continue  # Skip if same as main
-            
+
             try:
                 posts = await self._fetch_public_timeline(instance_url, limit=50)
                 instance_articles = []
@@ -131,40 +137,48 @@ class MastodonCollector(BaseCollector):
                     if article:
                         instance_articles.append(article)
                         articles.append(article)
-                logger.info("Fetched Mastodon posts", instance=instance_url, count=len(instance_articles))
+                logger.info(
+                    "Fetched Mastodon posts",
+                    instance=instance_url,
+                    count=len(instance_articles),
+                )
             except Exception as e:
-                logger.debug("Failed to fetch from instance", instance=instance_url, error=str(e))
-        
+                logger.debug(
+                    "Failed to fetch from instance", instance=instance_url, error=str(e)
+                )
+
         return articles
-    
-    async def _fetch_public_timeline(self, base_url: str, limit: int = 100) -> List[dict]:
+
+    async def _fetch_public_timeline(
+        self, base_url: str, limit: int = 100
+    ) -> List[dict]:
         """Fetch public timeline from a Mastodon instance."""
         url = f"{base_url.rstrip('/')}/api/v1/timelines/public"
         params = {"limit": min(limit, 40), "local": False}  # 40 is Mastodon max
-        
+
         all_posts = []
         max_id = None
-        
+
         # Paginate to get more posts
         while len(all_posts) < limit:
             if max_id:
                 params["max_id"] = max_id
-            
+
             response = await self.client.get(url, params=params)
             response.raise_for_status()
-            
+
             posts = response.json()
             if not posts:
                 break
-            
+
             all_posts.extend(posts)
             max_id = posts[-1]["id"]
-            
+
             if len(posts) < params["limit"]:
                 break
-        
+
         return all_posts[:limit]
-    
+
     def _parse_post(self, post: dict) -> Optional[CollectedArticle]:
         """Parse a Mastodon post into a CollectedArticle."""
         try:
@@ -172,40 +186,48 @@ class MastodonCollector(BaseCollector):
             content = post.get("content", "")
             if not content or len(content) < 20:
                 return None
-            
+
             # Skip replies (unless they're substantial)
             if post.get("in_reply_to_id") and len(content) < 100:
                 return None
-            
+
             # Strip HTML tags for plain text
-            text_content = re.sub(r'<[^>]+>', '', content)
+            text_content = re.sub(r"<[^>]+>", "", content)
             text_content = text_content.strip()
-            
+
             if len(text_content) < 20:
                 return None
-            
+
             # Get language and infer country
             language = post.get("language")
             country_code = LANGUAGE_COUNTRY.get(language) if language else None
-            
+
             # If no country from language, try to detect from content
             if not country_code:
-                country_code = detect_country_from_text(text_content, text_content[:200])
-            
+                country_code = detect_country_from_text(
+                    text_content, text_content[:200]
+                )
+
             # Parse timestamp
             created_at = post.get("created_at")
             published_at = None
             if created_at:
                 try:
-                    published_at = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+                    published_at = datetime.fromisoformat(
+                        created_at.replace("Z", "+00:00")
+                    )
                 except (ValueError, TypeError):
                     pass
-            
+
             # Get account info for source name
             account = post.get("account", {})
             username = account.get("username", "unknown")
-            instance = account.get("url", "").split("/")[2] if account.get("url") else "mastodon.social"
-            
+            instance = (
+                account.get("url", "").split("/")[2]
+                if account.get("url")
+                else "mastodon.social"
+            )
+
             return CollectedArticle(
                 source_type=self.source_type,
                 source_name=f"@{username}@{instance}",
@@ -215,11 +237,11 @@ class MastodonCollector(BaseCollector):
                 country_code=country_code,
                 published_at=published_at,
             )
-        
+
         except Exception as e:
             logger.debug("Failed to parse Mastodon post", error=str(e))
             return None
-    
+
     async def close(self):
         """Close the HTTP client."""
         await self.client.aclose()

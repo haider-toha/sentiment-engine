@@ -36,9 +36,9 @@ export default function CountryList({
 
   if (sortedCountries.length === 0) {
     return (
-      <div className="text-center py-12 px-4">
-        <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center mx-auto mb-3">
-          <Globe2 className="w-5 h-5 text-text-muted" />
+      <div className="px-4 py-12 text-center">
+        <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-surface">
+          <Globe2 className="h-5 w-5 text-text-muted" />
         </div>
         <p className="text-sm text-text-muted">No country data available</p>
       </div>
@@ -46,7 +46,7 @@ export default function CountryList({
   }
 
   const cycleSortBy = () => {
-    const order: typeof sortBy[] = ['articles', 'sentiment', 'name']
+    const order: (typeof sortBy)[] = ['articles', 'sentiment', 'name']
     const currentIndex = order.indexOf(sortBy)
     setSortBy(order[(currentIndex + 1) % order.length])
   }
@@ -60,18 +60,18 @@ export default function CountryList({
   return (
     <div>
       {/* Sort toggle */}
-      <div className="px-4 py-2 border-b border-border/50">
+      <div className="border-b border-border/50 px-4 py-2">
         <button
           onClick={cycleSortBy}
-          className="flex items-center gap-1.5 text-xs text-text-muted hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 text-xs text-text-muted transition-colors hover:text-foreground"
         >
-          <ArrowUpDown className="w-3 h-3" />
+          <ArrowUpDown className="h-3 w-3" />
           <span>{sortLabels[sortBy]}</span>
         </button>
       </div>
 
       {/* Country list */}
-      <div className="p-2 space-y-0.5 animate-stagger">
+      <div className="animate-stagger space-y-0.5 p-2">
         {sortedCountries.map((country, index) => {
           const color = interpolateSentimentColor(country.sentiment_score)
           const isSelected = selectedCountry === country.country_code
@@ -82,47 +82,43 @@ export default function CountryList({
               key={country.country_code}
               onClick={() => onSelect(country.country_code)}
               className={cn(
-                'w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-all text-left group',
-                isSelected
-                  ? 'bg-foreground text-background'
-                  : 'hover:bg-surface'
+                'group flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-all',
+                isSelected ? 'bg-foreground text-background' : 'hover:bg-surface'
               )}
             >
               {/* Rank number */}
-              <span className={cn(
-                'w-4 text-2xs font-mono tabular-nums',
-                isSelected ? 'text-background/50' : 'text-text-muted'
-              )}>
+              <span
+                className={cn(
+                  'w-4 font-mono text-2xs tabular-nums',
+                  isSelected ? 'text-background/50' : 'text-text-muted'
+                )}
+              >
                 {index + 1}
               </span>
 
               {/* Sentiment indicator */}
               <div
-                className="w-2 h-2 rounded-full flex-shrink-0"
+                className="h-2 w-2 flex-shrink-0 rounded-full"
                 style={{ backgroundColor: isSelected ? 'currentColor' : color }}
               />
 
               {/* Country info */}
-              <div className="flex-1 min-w-0">
-                <span className={cn(
-                  'text-sm truncate block',
-                  isSelected && 'text-background'
-                )}>
+              <div className="min-w-0 flex-1">
+                <span className={cn('block truncate text-sm', isSelected && 'text-background')}>
                   {country.country_name}
                 </span>
-                <span className={cn(
-                  'text-2xs',
-                  isSelected ? 'text-background/50' : 'text-text-muted'
-                )}>
+                <span
+                  className={cn('text-2xs', isSelected ? 'text-background/50' : 'text-text-muted')}
+                >
                   {country.article_count} articles
                 </span>
               </div>
-              
+
               {/* Sentiment value */}
               <div className="flex items-center gap-1.5">
                 <span
                   className={cn(
-                    'text-sm font-mono tabular-nums',
+                    'font-mono text-sm tabular-nums',
                     isSelected ? 'text-background' : ''
                   )}
                   style={{ color: isSelected ? undefined : color }}
@@ -130,10 +126,12 @@ export default function CountryList({
                   {country.sentiment_score >= 0 ? '+' : ''}
                   {(country.sentiment_score * 100).toFixed(0)}
                 </span>
-                <ChevronRight className={cn(
-                  'w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity',
-                  isSelected ? 'text-background/50 opacity-100' : 'text-text-muted'
-                )} />
+                <ChevronRight
+                  className={cn(
+                    'h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100',
+                    isSelected ? 'text-background/50 opacity-100' : 'text-text-muted'
+                  )}
+                />
               </div>
             </button>
           )

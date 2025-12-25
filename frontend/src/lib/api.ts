@@ -57,11 +57,11 @@ export interface HealthStatus {
 
 async function fetchAPI<T>(endpoint: string): Promise<T> {
   const response = await fetch(`${API_BASE}${endpoint}`)
-  
+
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`)
   }
-  
+
   return response.json()
 }
 
@@ -70,13 +70,13 @@ export const api = {
    * Get global sentiment overview
    */
   getGlobalSentiment: () => fetchAPI<GlobalSentiment>('/sentiment/global'),
-  
+
   /**
    * Get detailed data for a specific country
    */
-  getCountryDetail: (countryCode: string, hours = 24) => 
+  getCountryDetail: (countryCode: string, hours = 24) =>
     fetchAPI<CountryDetail>(`/sentiment/${countryCode}?hours=${hours}`),
-  
+
   /**
    * Get headlines for a country
    */
@@ -85,18 +85,17 @@ export const api = {
     if (sentiment) url += `&sentiment=${sentiment}`
     return fetchAPI<Headline[]>(url)
   },
-  
+
   /**
    * Get global trends over time
    */
-  getTrends: (hours = 24) => 
-    fetchAPI<HourlyTrend[]>(`/trends?hours=${hours}`),
-  
+  getTrends: (hours = 24) => fetchAPI<HourlyTrend[]>(`/trends?hours=${hours}`),
+
   /**
    * Get health status
    */
   getHealth: () => fetchAPI<HealthStatus>('/health'),
-  
+
   /**
    * Trigger a data collection
    */
@@ -107,4 +106,3 @@ export const api = {
     return response.json()
   },
 }
-
