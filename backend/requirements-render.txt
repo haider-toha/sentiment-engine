@@ -1,0 +1,29 @@
+# =============================================================================
+# Render Deployment Requirements (Read-Only Mode)
+# =============================================================================
+# This is a lightweight version for cloud deployment.
+# ML model is NOT loaded - ingestion happens locally.
+# =============================================================================
+
+# FastAPI and server
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+
+# Database (PostgreSQL only for production)
+sqlalchemy>=2.0.25
+psycopg2-binary>=2.9.9
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+structlog>=24.1.0
+pycountry>=23.12.11
+
+# APScheduler still needed for status checks (but won't run jobs)
+apscheduler>=3.10.4
+
+# Note: No ML dependencies (torch, transformers, etc.)
+# The read-only mode skips ML model loading entirely
+

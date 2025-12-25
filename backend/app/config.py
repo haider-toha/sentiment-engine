@@ -54,6 +54,13 @@ class Settings(BaseSettings):
     thenewsapi_api_key: str = ""
     
     # ============================================
+    # Deployment Mode
+    # ============================================
+    # Read-only mode: disable ML model loading and scheduler
+    # Use this for cloud deployment where local machine handles ingestion
+    readonly_mode: bool = False
+    
+    # ============================================
     # ML Settings
     # ============================================
     use_gpu: bool = True  # Set to False for cloud deployment

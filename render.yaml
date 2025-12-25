@@ -1,0 +1,55 @@
+# Render Blueprint - Infrastructure as Code
+# https://render.com/docs/blueprint-spec
+
+services:
+  # ===========================================
+  # Backend API (FastAPI) - Read-only mode
+  # ===========================================
+  - type: web
+    name: sentiment-engine-api
+    runtime: python
+    region: oregon
+    plan: starter  # $7/mo - 512MB RAM (sufficient for read-only)
+    buildCommand: |
+      cd backend && pip install --upgrade pip && pip install -r requirements-render.txt
+    startCommand: |
+      cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: READONLY_MODE
+        value: "true"
+      - key: USE_GPU
+        value: "false"
+      - key: DB_USER
+        sync: false  # Set in Render dashboard
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "6543"
+      - key: DB_NAME
+        value: "postgres"
+      - key: PYTHON_VERSION
+        value: "3.11.4"
+
+  # ===========================================
+  # Frontend (Next.js) - Static Site
+  # ===========================================
+  - type: web
+    name: sentiment-engine-frontend
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/out
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false  # Set to your backend URL after first deploy
+
