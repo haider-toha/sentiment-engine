@@ -127,7 +127,8 @@ async def get_country_headlines(
             Article.sentiment_score <= 0.2
         )
     
-    headlines = query.order_by(Article.created_at.desc()).limit(limit).all()
+    # Order by absolute sentiment score (most extreme first)
+    headlines = query.order_by(func.abs(Article.sentiment_score).desc()).limit(limit).all()
     
     return [
         {

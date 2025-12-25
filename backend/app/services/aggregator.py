@@ -189,14 +189,14 @@ class SentimentAggregator:
         if not hourly:
             return None
         
-        # Get recent headlines
+        # Get headlines with highest absolute sentiment scores
         headlines = self.db.query(Article).filter(
             and_(
                 Article.country_code == country_code,
                 Article.created_at >= since,
                 Article.sentiment_score.isnot(None),
             )
-        ).order_by(Article.created_at.desc()).limit(20).all()
+        ).order_by(func.abs(Article.sentiment_score).desc()).limit(20).all()
         
         # Get source breakdown
         source_counts = self.db.query(
