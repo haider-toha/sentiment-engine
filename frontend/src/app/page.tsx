@@ -120,10 +120,38 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar - All Panels Stacked */}
-        <div className="w-80 flex-shrink-0 overflow-y-auto border-r border-border/60 xl:w-96">
-          <div className="space-y-4 p-4">
+      <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+        {/* Mobile Globe - Shown at top on mobile */}
+        <div className="relative h-[280px] flex-shrink-0 border-b border-border/60 bg-[#FAFAF9] lg:hidden">
+          {isLoading ? (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+              <div className="relative">
+                <Skeleton className="h-32 w-32 rounded-full" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <RefreshCw className="h-6 w-6 animate-spin text-text-muted" />
+                </div>
+              </div>
+              <p className="text-xs text-text-muted">Loading...</p>
+            </div>
+          ) : (
+            <>
+              <GlobeWrapper
+                countries={data?.countries || []}
+                onCountrySelect={handleCountrySelect}
+                selectedCountry={selectedCountry}
+              />
+
+              {/* Legend overlay - Mobile */}
+              <div className="glass absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-border/40 px-4 py-1.5 shadow-soft">
+                <Legend />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Dashboard Content */}
+        <div className="flex-1 overflow-y-auto lg:w-80 lg:flex-none lg:border-r lg:border-border/60 xl:w-96">
+          <div className="space-y-4 p-4 pb-16 lg:pb-4">
             {/* Global Sentiment Card */}
             {isLoading ? (
               <Card className="overflow-hidden">
@@ -219,7 +247,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="max-h-[240px] overflow-y-auto">
+              <div className="max-h-[200px] overflow-y-auto lg:max-h-[240px]">
                 {isLoading ? (
                   <div className="space-y-1.5 p-3">
                     {[...Array(5)].map((_, i) => (
@@ -237,33 +265,40 @@ export default function Home() {
               </div>
             </Card>
 
-            {/* Country Detail Panel */}
-            {selectedCountry ? (
-              <CountryPanel
-                countryCode={selectedCountry}
-                onClose={() => handleCountrySelect(null)}
-              />
-            ) : (
-              <Card className="flex flex-col items-center justify-center border-dashed p-5 text-center">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-surface">
-                  <MapPin className="h-5 w-5 text-text-muted" />
-                </div>
-                <h3 className="mb-1 text-sm font-medium text-foreground">Select a country</h3>
-                <p className="max-w-[180px] text-xs text-text-secondary">
-                  Click on a country from the list or globe to view details
-                </p>
-                <div className="mt-4 flex items-center gap-1.5 text-2xs text-text-muted">
-                  <span className="kbd">↑</span>
-                  <span className="kbd">↓</span>
-                  <span>to navigate</span>
-                </div>
-              </Card>
-            )}
+            {/* Country Detail Panel - Hidden on mobile (uses slide-up instead) */}
+            <div className="hidden lg:block">
+              {selectedCountry ? (
+                <CountryPanel
+                  countryCode={selectedCountry}
+                  onClose={() => handleCountrySelect(null)}
+                />
+              ) : (
+                <Card className="flex flex-col items-center justify-center border-dashed p-5 text-center">
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-surface">
+                    <MapPin className="h-5 w-5 text-text-muted" />
+                  </div>
+                  <h3 className="mb-1 text-sm font-medium text-foreground">Select a country</h3>
+                  <p className="max-w-[180px] text-xs text-text-secondary">
+                    Click on a country from the list or globe to view details
+                  </p>
+                  <div className="mt-4 flex items-center gap-1.5 text-2xs text-text-muted">
+                    <span className="kbd">↑</span>
+                    <span className="kbd">↓</span>
+                    <span>to navigate</span>
+                  </div>
+                </Card>
+              )}
+            </div>
+
+            {/* Footer - Mobile */}
+            <div className="pt-4 lg:hidden">
+              <p className="text-center text-2xs text-text-muted">Haider © 2025</p>
+            </div>
           </div>
         </div>
 
-        {/* Right - Globe (takes remaining space) */}
-        <div className="relative flex-1 bg-[#FAFAF9]">
+        {/* Desktop Globe - Takes remaining space on desktop */}
+        <div className="relative hidden flex-1 bg-[#FAFAF9] lg:block">
           {isLoading ? (
             <div className="flex h-full w-full flex-col items-center justify-center gap-3">
               <div className="relative">
@@ -296,8 +331,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Footer - positioned at bottom of sidebar */}
-      <div className="absolute bottom-0 left-0 w-80 border-r border-t border-border/60 bg-background/95 backdrop-blur-sm xl:w-96">
+      {/* Footer - Desktop (positioned at bottom of sidebar) */}
+      <div className="absolute bottom-0 left-0 hidden w-80 border-r border-t border-border/60 bg-background/95 backdrop-blur-sm lg:block xl:w-96">
         <div className="px-4 py-3">
           <p className="text-center text-2xs text-text-muted">Haider © 2025</p>
         </div>
