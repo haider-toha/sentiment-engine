@@ -35,7 +35,7 @@ function FallbackSphere() {
 }
 
 function GlobeMesh({ countries, onCountrySelect, selectedCountry }: GlobeProps) {
-  const meshRef = useRef<THREE.Mesh>(null)
+  const meshRef = useRef<THREE.Group>(null)
   const [hovered, setHovered] = useState<string | null>(null)
 
   // Slow rotation
